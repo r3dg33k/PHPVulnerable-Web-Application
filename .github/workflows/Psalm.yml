@@ -11,12 +11,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Initialize Psalm config (if no composer.json)
-        run: |
-          if [ ! -f psalm.xml ]; then
-            psalm --init src   # <-- replace 'src' with your PHP folder
-          fi
-
       - name: Run Psalm scan
         uses: docker://ghcr.io/psalm/psalm-github-actions
         with:
@@ -24,6 +18,6 @@ jobs:
           report_file: results.sarif
 
       - name: Upload Security Analysis results to GitHub
-        uses: github/codeql-action/upload-sarif@v3   # ✅ updated version
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
