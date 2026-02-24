@@ -1,7 +1,8 @@
 name: Semgrep Scan
 
 on:
-  workflow_dispatch:   # Allows manual triggering
+  workflow_dispatch:   # Run manually
+  pull_request:        # Also runs on PRs
 
 jobs:
   semgrep:
@@ -19,11 +20,18 @@ jobs:
       - name: Install Semgrep
         run: pip install semgrep
 
-      - name: Run Semgrep on PHP code (JSON output)
-        run: semgrep --config=p/ci --include '**/*.php' --json > semgrep-results.json
+      - name: Run Semgrep (JSON + SARIF)
+        run: |
+          semgrep --config=p/ci --include '**/*.php' --json > semgrep-results.json
+          semgrep --config=p/ci --include '**/*.php' --sarif > semgrep-results.sarif
 
-      - name: Upload Semgrep results
-        uses: actions/upload-artifact@v4   # ✅ updated version
+      - name: Upload JSON results
+        uses: actions/upload-artifact@v4
         with:
-          name: semgrep-results
+          name: semgrep-json
           path: semgrep-results.json
+
+      - name: Upload SARIF for GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: semgrep-results.sarif
