@@ -1,0 +1,28 @@
+name: Semgrep Scan
+
+on:
+  workflow_dispatch:   # 👈 This allows you to trigger it manually from GitHub
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep on PHP code
+        run: semgrep --config=p/ci --include '**/*.php'
+      - name: Upload Semgrep results
+        uses: actions/upload-artifact@v3
+        with:
+          name: semgrep-results
+          path: semgrep-results.json
