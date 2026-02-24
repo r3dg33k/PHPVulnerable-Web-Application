@@ -1,37 +1,31 @@
 name: Semgrep Scan
 
 on:
-  workflow_dispatch:   # Run manually
-  pull_request:        # Also runs on PRs
+  workflow_dispatch:   # Manual trigger
 
 jobs:
   semgrep:
     runs-on: ubuntu-latest
+    container:
+      # A Docker image with Semgrep installed. Do not change this.
+      image: returntocorp/semgrep
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      - name: Install Semgrep
-        run: pip install semgrep
-
-      - name: Run Semgrep (JSON + SARIF)
+      - name: Run Semgrep scan
         run: |
-          semgrep --config=p/ci --include '**/*.php' --json > semgrep-results.json
-          semgrep --config=p/ci --include '**/*.php' --sarif > semgrep-results.sarif
+          semgrep scan -q --sarif --config auto ./vulnerable-source-code > semgrep-results.sarif
 
-      - name: Upload JSON results
-        uses: actions/upload-artifact@v4
+      - name: Save SARIF results as artifact
+        uses: actions/upload-artifact@v4   # ✅ updated version
         with:
-          name: semgrep-json
-          path: semgrep-results.json
+          name: semgrep-scan-results
+          path: semgrep-results.sarif
 
-      - name: Upload SARIF for GitHub Code Scanning
+      - name: Upload SARIF to GitHub Security Dashboard
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: semgrep-results.sarif
+        if: always()
