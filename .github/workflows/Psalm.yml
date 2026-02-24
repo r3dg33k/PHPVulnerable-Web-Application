@@ -1,4 +1,4 @@
-name: Psalm Static analysis
+name: Psalm Static Analysis
 
 on: [push, pull_request]
 
@@ -6,16 +6,24 @@ jobs:
   psalm:
     name: Psalm
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Psalm
+      - name: Initialize Psalm config (if no composer.json)
+        run: |
+          if [ ! -f psalm.xml ]; then
+            psalm --init src   # <-- replace 'src' with your PHP folder
+          fi
+
+      - name: Run Psalm scan
         uses: docker://ghcr.io/psalm/psalm-github-actions
         with:
           security_analysis: true
           report_file: results.sarif
+
       - name: Upload Security Analysis results to GitHub
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3   # ✅ updated version
         with:
           sarif_file: results.sarif
