@@ -16,7 +16,7 @@ jobs:
         uses: docker://ghcr.io/psalm/psalm-github-actions
         with:
           args: sh -c "\
-            if [ ! -f psalm.xml ]; then psalm --init src; fi && \
+            if [ ! -f psalm.xml ]; then psalm --init .; fi && \
             psalm --no-progress --output-format=sarif > results.sarif"
 
       - name: Upload SARIF to GitHub Security Dashboard
