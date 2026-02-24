@@ -1,23 +1,27 @@
 name: Psalm Static Analysis
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
 
 jobs:
   psalm:
-    name: Psalm
+    name: Psalm Scan
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Run Psalm scan
+      - name: Run Psalm scan in Docker
         uses: docker://ghcr.io/psalm/psalm-github-actions
         with:
-          security_analysis: true
-          report_file: results.sarif
+          args: sh -c "\
+            if [ ! -f psalm.xml ]; then psalm --init src; fi && \
+            psalm --no-progress --output-format=sarif > results.sarif"
 
-      - name: Upload Security Analysis results to GitHub
+      - name: Upload SARIF to GitHub Security Dashboard
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
