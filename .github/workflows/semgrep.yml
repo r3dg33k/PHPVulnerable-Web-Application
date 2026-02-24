@@ -1,7 +1,7 @@
 name: Semgrep Scan
 
 on:
-  workflow_dispatch:   # 👈 This allows you to trigger it manually from GitHub
+  workflow_dispatch:   # Allows manual triggering
 
 jobs:
   semgrep:
@@ -19,10 +19,11 @@ jobs:
       - name: Install Semgrep
         run: pip install semgrep
 
-      - name: Run Semgrep on PHP code
-        run: semgrep --config=p/ci --include '**/*.php'
+      - name: Run Semgrep on PHP code (JSON output)
+        run: semgrep --config=p/ci --include '**/*.php' --json > semgrep-results.json
+
       - name: Upload Semgrep results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4   # ✅ updated version
         with:
           name: semgrep-results
           path: semgrep-results.json
