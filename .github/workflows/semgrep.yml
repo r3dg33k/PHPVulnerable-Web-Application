@@ -6,6 +6,9 @@ on:
 jobs:
   semgrep:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     container:
       # A Docker image with Semgrep installed. Do not change this.
       image: returntocorp/semgrep
