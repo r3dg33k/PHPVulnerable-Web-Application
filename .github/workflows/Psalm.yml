@@ -1,25 +1,30 @@
-name: Psalm Static Analysis
+name: Psalm
 
 on:
-  workflow_dispatch:   # Manual trigger
+  workflow_dispatch:   # 👈 allows manual on-demand trigger
 
 jobs:
   psalm:
-    name: Psalm Scan
+    name: psalm
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
-      - name: Run Psalm scan in Docker
-        uses: docker://ghcr.io/psalm/psalm-github-actions
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          args: sh -c "\
-            if [ ! -f psalm.xml ]; then psalm --init .; fi && \
-            psalm --no-progress --output-format=sarif > results.sarif"
+          php-version: '7.4'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
+          coverage: none
 
-      - name: Upload SARIF to GitHub Security Dashboard
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Cache composer dependencies
+        uses: actions/cache@v2
         with:
-          sarif_file: results.sarif
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - name: Run composer install
+        run: composer install -n --prefer-dist
+
+      - name: Run psalm
+        run: ./vendor/bin/psalm --output-format=github
